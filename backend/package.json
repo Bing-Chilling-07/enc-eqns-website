@@ -1,0 +1,17 @@
+{
+  "name": "crypto-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
