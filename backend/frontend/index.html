@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Algorithms Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .algorithm-page {
+            display: none;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .algorithm-page.active {
+            display: block;
+        }
+
+        .algorithm-page h2 {
+            color: #5a67d8;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .description {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #5a67d8;
+        }
+
+        .rsa-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .rsa-section h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+        }
+
+        .rsa-section h3::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: #5a67d8;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(90, 103, 216, 0.1);
+            border-radius: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #5a67d8;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+            outline: none;
+            border-color: #5a67d8;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #5a67d8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #4c51bf;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #68d391;
+        }
+
+        .btn-secondary:hover {
+            background: #48bb78;
+        }
+
+        .btn-danger {
+            background: #f56565;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .loading {
+            display: none;
+            color: #5a67d8;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .output {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .error {
+            color: #f56565;
+            background: #fed7d7;
+        }
+
+        .success {
+            color: #38a169;
+            background: #c6f6d5;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #48bb78;
+        }
+
+        .status-offline {
+            background: #f56565;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .copy-btn {
+            background: #4299e1;
+            font-size: 12px;
+            padding: 8px 12px;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #3182ce;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Cryptography Algorithms Demo</h1>
+            <p>Interactive demonstration using C implementations</p>
+            <p><span class="status-indicator" id="server-status"></span><span id="server-text">Checking server...</span></p>
+        </div>
+
+        <div class="nav">
+            <button class="nav-btn active" onclick="showPage('rsa')">RSA</button>
+            <button class="nav-btn" onclick="showPage('aes')">AES</button>
+            <button class="nav-btn" onclick="showPage('elgamal')">ElGamal</button>
+            <button class="nav-btn" onclick="showPage('diffie')">Diffie-Hellman</button>
+        </div>
+
+        <!-- RSA Page -->
+        <div id="rsa" class="algorithm-page active">
+            <h2>RSA Encryption</h2>
+            <div class="description">
+                <p><strong>RSA</strong> is an asymmetric cryptographic algorithm that uses a pair of keys (public and private) for encryption and decryption. This implementation uses your C code.</p>
+            </div>
+
+            <!-- Encryption Section -->
+            <div class="rsa-section">
+                <h3>🔒 Encryption</h3>
+                
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="encrypt-use-random-keys" checked onchange="toggleEncryptKeyMode()">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="encrypt-use-random-keys">Use randomly generated keys</label>
+                </div>
+
+                <div id="encrypt-random-section">
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="generateKeys('rsa')">Generate New RSA Keys</button>
+                    </div>
+                    <div class="loading" id="rsa-loading">Generating keys...</div>
+
+                    <div class="input-group">
+                        <label>Generated Public Key:</label>
+                        <textarea id="rsa-public-key-generated" rows="3" readonly placeholder="Public key will appear here..."></textarea>
+                        <button class="btn copy-btn" onclick="copyToClipboard('rsa-public-key-generated')">Copy</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Generated Private Key:</label>
+                        <textarea id="rsa-private-key-generated" rows="3" readonly placeholder="Private key will appear here..."></textarea>
+                        <button class="btn copy-btn" onclick="copyToClipboard('rsa-private-key-generated')">Copy</button>
+                    </div>
+                </div>
+
+                <div id="encrypt-manual-section" class="hidden">
+                    <div class="input-group">
+                        <label>Enter Public Key (format: n: ...\ne: ...):</label>
+                        <textarea id="rsa-public-key-manual" rows="3" placeholder="n: your_n_value_here&#10;e: your_e_value_here"></textarea>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Message to Encrypt:</label>
+                    <textarea id="rsa-message-encrypt" rows="3" placeholder="Enter your message here..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" onclick="encryptRSA()">Encrypt Message</button>
+                </div>
+                <div class="loading" id="rsa-encrypt-loading">Encrypting...</div>
+
+                <div class="output" id="rsa-encrypt-output">Enter a message and click "Encrypt Message" to start...</div>
+            </div>
+
+            <!-- Decryption Section -->
+            <div class="rsa-section">
+                <h3>🔓 Decryption</h3>
+
+                <div class="input-group">
+                    <label>Private Key (format: n: ...\nd: ...):</label>
+                    <textarea id="rsa-private-key-decrypt" rows="3" placeholder="n: your_n_value_here&#10;d: your_d_value_here"></textarea>
+                    <button class="btn copy-btn" onclick="copyFromGenerated('rsa-private-key-generated', 'rsa-private-key-decrypt')">Copy from Generated</button>
+                </div>
+
+                <div class="input-group">
+                    <label>Encrypted Data to Decrypt:</label>
+                    <textarea id="rsa-encrypted-input" rows="3" placeholder="Paste encrypted data here for decryption..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-danger" onclick="decryptRSA()">Decrypt Message</button>
+                </div>
+                <div class="loading" id="rsa-decrypt-loading">Decrypting...</div>
+
+                <div class="output" id="rsa-decrypt-output">Enter encrypted data and private key to start decryption...</div>
+            </div>
+        </div>
+
+        <!-- AES Page -->
+        <div id="aes" class="algorithm-page">
+            <h2>AES Encryption</h2>
+            <div class="description">
+                <p><strong>AES (Advanced Encryption Standard)</strong> is a symmetric encryption algorithm. This implementation uses your C code with 128/192/256-bit keys.</p>
+            </div>
+
+            <div class="input-group">
+                <label>Key Size:</label>
+                <select id="aes-key-size">
+                    <option value="128">128-bit</option>
+                    <option value="192">192-bit</option>
+                    <option value="256">256-bit</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="generateKeys('aes')">Generate AES Key</button>
+            </div>
+            <div class="loading" id="aes-loading">Generating key...</div>
+
+            <div class="input-group">
+                <label>Secret Key:</label>
+                <input type="text" id="aes-key" readonly placeholder="Generated key will appear here...">
+            </div>
+
+            <div class="input-group">
+                <label>Message to Encrypt:</label>
+                <textarea id="aes-message" rows="3" placeholder="Enter your message here..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Encrypted Data to Decrypt:</label>
+                <textarea id="aes-encrypted-input" rows="2" placeholder="Paste encrypted data here for decryption..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn" onclick="encrypt('aes')">Encrypt with C</button>
+                <button class="btn" onclick="decrypt('aes')">Decrypt with C</button>
+            </div>
+            <div class="loading" id="aes-process-loading">Processing...</div>
+
+            <div class="output" id="aes-output">Click "Generate AES Key" to start...</div>
+        </div>
+
+        <!-- ElGamal Page -->
+        <div id="elgamal" class="algorithm-page">
+            <h2>ElGamal Encryption</h2>
+            <div class="description">
+                <p><strong>ElGamal</strong> is an asymmetric encryption algorithm based on the discrete logarithm problem. This uses your C implementation.</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="generateKeys('elgamal')">Generate ElGamal Keys</button>
+            </div>
+            <div class="loading" id="elgamal-loading">Generating keys...</div>
+
+            <div class="two-column">
+                <div>
+                    <div class="input-group">
+                        <label>Public Key (p, g, y):</label>
+                        <input type="text" id="elgamal-p" placeholder="p (prime)" readonly>
+                        <input type="text" id="elgamal-g" placeholder="g (generator)" readonly>
+                        <input type="text" id="elgamal-y" placeholder="y (public key)" readonly>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-group">
+                        <label>Private Key:</label>
+                        <input type="text" id="elgamal-x" placeholder="x (private key)" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Message to Encrypt:</label>
+                <textarea id="elgamal-message" rows="2" placeholder="Enter your message here..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Encrypted Data to Decrypt:</label>
+                <textarea id="elgamal-encrypted-input" rows="2" placeholder="Paste encrypted data here for decryption..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn" onclick="encrypt('elgamal')">Encrypt with C</button>
+                <button class="btn" onclick="decrypt('elgamal')">Decrypt with C</button>
+            </div>
+            <div class="loading" id="elgamal-process-loading">Processing...</div>
+
+            <div class="output" id="elgamal-output">Click "Generate ElGamal Keys" to start...</div>
+        </div>
+
+        <!-- Diffie-Hellman Page -->
+        <div id="diffie" class="algorithm-page">
+            <h2>Diffie-Hellman Key Exchange</h2>
+            <div class="description">
+                <p><strong>Diffie-Hellman</strong> key exchange protocol implemented in C. Demonstrates secure key agreement between two parties.</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="performKeyExchange()">Perform Key Exchange</button>
+            </div>
+            <div class="loading" id="diffie-loading">Performing key exchange...</div>
+
+            <div class="two-column">
+                <div>
+                    <h3>Alice</h3>
+                    <div class="input-group">
+                        <label>Private Key:</label>
+                        <input type="text" id="alice-private" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>Public Key:</label>
+                        <input type="text" id="alice-public" readonly>
+                    </div>
+                </div>
+                <div>
+                    <h3>Bob</h3>
+                    <div class="input-group">
+                        <label>Private Key:</label>
+                        <input type="text" id="bob-private" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>Public Key:</label>
+                        <input type="text" id="bob-public" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output" id="diffie-output">Click "Perform Key Exchange" to start...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let serverOnline = false;
+
+        // Check server status
+        async function checkServer() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    serverOnline = true;
+                    document.getElementById('server-status').className = 'status-indicator status-online';
+                    document.getElementById('server-text').textContent = 'Server online - C implementations ready';
+                } else {
+                    throw new Error('Server offline');
+                }
+            } catch (error) {
+                serverOnline = false;
+                document.getElementById('server-status').className = 'status-indicator status-offline';
+                document.getElementById('server-text').textContent = 'Server offline - Start your backend server';
+            }
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.algorithm-page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Toggle encrypt key mode
+        function toggleEncryptKeyMode() {
+            const useRandom = document.getElementById('encrypt-use-random-keys').checked;
+            const randomSection = document.getElementById('encrypt-random-section');
+            const manualSection = document.getElementById('encrypt-manual-section');
+            
+            if (useRandom) {
+                randomSection.classList.remove('hidden');
+                manualSection.classList.add('hidden');
+            } else {
+                randomSection.classList.add('hidden');
+                manualSection.classList.remove('hidden');
+            }
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        // Copy from generated to decrypt input
+        function copyFromGenerated(sourceId, targetId) {
+            const source = document.getElementById(sourceId).value;
+            const target = document.getElementById(targetId);
+            target.value = source;
+            
+            // Show feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        // Generic API call function
+        async function apiCall(endpoint, data = {}) {
+            if (!serverOnline) {
+                return { error: 'Server is offline. Please start your backend server.' };
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Server error');
+                }
+                return result;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        // Show/hide loading indicators
+        function toggleLoading(loadingId, show) {
+            const element = document.getElementById(loadingId);
+            if (element) {
+                element.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        // Generate RSA keys
+        async function generateKeys(algorithm) {
+        if (algorithm === 'rsa') {
+        toggleLoading('rsa-loading', true);
+        
+        const result = await apiCall('/rsa/generate');
+        
+        toggleLoading('rsa-loading', false);
+        
+        if (result.error) {
+            document.getElementById('rsa-encrypt-output').textContent = `Error: ${result.error}`;
+            document.getElementById('rsa-encrypt-output').className = 'output error';
+            return;
+        }
+
+        document.getElementById('rsa-public-key-generated').value = result.publicKey;
+        document.getElementById('rsa-private-key-generated').value = result.privateKey;
+        document.getElementById('rsa-encrypt-output').textContent = 'RSA keys generated successfully!';
+        document.getElementById('rsa-encrypt-output').className = 'output success';
+        }
+        }
+
+        // RSA Encryption
+        async function encryptRSA() {
+        const message = document.getElementById('rsa-message-encrypt').value;
+        if (!message.trim()) {
+        document.getElementById('rsa-encrypt-output').textContent = 'Please enter a message to encrypt';
+        document.getElementById('rsa-encrypt-output').className = 'output error';
+        return;
+        }
+
+        const useRandom = document.getElementById('encrypt-use-random-keys').checked;
+        let publicKey;
+        
+        if (useRandom) {
+            publicKey = document.getElementById('rsa-public-key-generated').value;
+        } else {
+            publicKey = document.getElementById('rsa-public-key-manual').value;
+        }
+
+        if (!publicKey.trim()) {
+            document.getElementById('rsa-encrypt-output').textContent = 'Please generate keys or enter a public key';
+            document.getElementById('rsa-encrypt-output').className = 'output error';
+            return;
+        }
+
+    toggleLoading('rsa-encrypt-loading', true);
+
+        const result = await apiCall('/rsa/encrypt', { message, publicKey });
+        
+        toggleLoading('rsa-encrypt-loading', false);
+
+        if (result.error) {
+            document.getElementById('rsa-encrypt-output').textContent = `Encryption Error: ${result.error}`;
+            document.getElementById('rsa-encrypt-output').className = 'output error';
+        } else {
+        // Handle the response from your C program
+        let outputText = `Encryption Successful!\n\n`;
+        outputText += `Original Text: ${result.originalText}\n`;
+        outputText += `Original Number: ${result.originalNumber}\n`;
+        outputText += `Encrypted (hex): ${result.encrypted}\n\n`;
+        outputText += `Copy this encrypted value for decryption: ${result.encrypted}`;
+        
+        document.getElementById('rsa-encrypt-output').textContent = outputText;
+        document.getElementById('rsa-encrypt-output').className = 'output success';
+        
+        // Optionally auto-copy the encrypted value to the decrypt section
+        document.getElementById('rsa-encrypted-input').value = result.encrypted;
+        }
+        }
+
+
+        // RSA Decryption
+        async function decryptRSA() {
+        const privateKey = document.getElementById('rsa-private-key-decrypt').value;
+        const encryptedData = document.getElementById('rsa-encrypted-input').value;
+        
+        if (!privateKey.trim()) {
+            document.getElementById('rsa-decrypt-output').textContent = 'Please enter a private key';
+            document.getElementById('rsa-decrypt-output').className = 'output error';
+            return;
+        }
+        
+        if (!encryptedData.trim()) {
+            document.getElementById('rsa-decrypt-output').textContent = 'Please enter encrypted data to decrypt';
+            document.getElementById('rsa-decrypt-output').className = 'output error';
+            return;
+        }
+
+        toggleLoading('rsa-decrypt-loading', true);
+
+        const result = await apiCall('/rsa/decrypt', { privateKey, encryptedData });
+        
+        toggleLoading('rsa-decrypt-loading', false);
+
+        if (result.error) {
+            document.getElementById('rsa-decrypt-output').textContent = `Decryption Error: ${result.error}`;
+            document.getElementById('rsa-decrypt-output').className = 'output error';
+        } else {
+            // Handle the response from your C program
+            let outputText = `Decryption Successful!\n\n`;
+            outputText += `Decrypted Number: ${result.decryptedNumber}\n`;
+            
+        if (result.decryptedText) {
+            outputText += `Decrypted Text: "${result.decryptedText}"\n`;
+        } else {
+            outputText += `Decrypted Text: (Non-printable or binary data)\n`;
+        }
+            
+        document.getElementById('rsa-decrypt-output').textContent = outputText;
+        document.getElementById('rsa-decrypt-output').className = 'output success';
+        }
+    }
+
+        // Placeholder functions for other algorithms (keep your existing implementations)
+        async function encrypt(algorithm) {
+            // Your existing encrypt function for AES, ElGamal, etc.
+        }
+
+        async function decrypt(algorithm) {
+            // Your existing decrypt function for AES, ElGamal, etc.
+        }
+
+        async function performKeyExchange() {
+            // Your existing Diffie-Hellman function
+        }
+
+        // Initialize
+        window.onload = function() {
+            checkServer();
+            setInterval(checkServer, 10000);
+        };
+    </script>
+</body>
+</html>

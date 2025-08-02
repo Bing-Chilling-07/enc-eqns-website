@@ -1,25 +1,27 @@
-# Compiled binaries
-backend/c_programs/rsa
-backend/c_programs/aes
-backend/c_programs/elgamal
-backend/c_programs/diffie_hellman
-*.exe
-*.out
-
-# Node.js
+# Node.js dependencies
 node_modules/
-npm-debug.log*
-package-lock.json
 
-# System files
+# Compiled C programs
+*.o
+backend/c_programs/rsa_keygen
+backend/c_programs/rsa_encrypt
+backend/c_programs/rsa_decrypt
+
+# Environment files
+.env
+
+# IDE specific files
+.vscode/
+*.code-workspace
+
+# OS specific files
 .DS_Store
 Thumbs.db
 
-# WSL/Windows paths
-*.bin
-mime
-
 # Logs
 *.log
+npm-debug.log*
 
-
+# Build directories
+dist/
+build/
