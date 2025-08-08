@@ -1,7 +1,7 @@
 {
   "name": "crypto-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "backend/server.js",
   "dependencies": {
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
