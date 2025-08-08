@@ -90,7 +90,7 @@
             border-left: 4px solid #5a67d8;
         }
 
-        .rsa-section {
+        .section {
             margin-bottom: 40px;
             padding: 20px;
             border: 2px solid #e2e8f0;
@@ -98,7 +98,7 @@
             background: rgba(255,255,255,0.5);
         }
 
-        .rsa-section h3 {
+        .section h3 {
             color: #4a5568;
             margin-bottom: 20px;
             font-size: 1.5em;
@@ -106,7 +106,7 @@
             align-items: center;
         }
 
-        .rsa-section h3::before {
+        .section h3::before {
             content: "";
             width: 4px;
             height: 20px;
@@ -240,6 +240,14 @@
             background: #e53e3e;
         }
 
+        .btn-warning {
+            background: #ed8936;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+        }
+
         .loading {
             display: none;
             color: #5a67d8;
@@ -276,8 +284,14 @@
             gap: 20px;
         }
 
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
         @media (max-width: 768px) {
-            .two-column {
+            .two-column, .three-column {
                 grid-template-columns: 1fr;
             }
             
@@ -317,6 +331,38 @@
         .copy-btn:hover {
             background: #3182ce;
         }
+
+        .curve-params {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .curve-params h4 {
+            color: #4c51bf;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .small-input {
+            width: auto !important;
+            min-width: 120px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .party-section {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .party-section h4 {
+            color: #8b5cf6;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -329,6 +375,7 @@
 
         <div class="nav">
             <button class="nav-btn active" onclick="showPage('rsa')">RSA</button>
+            <button class="nav-btn" onclick="showPage('ecdh')">ECDH</button>
             <button class="nav-btn" onclick="showPage('aes')">AES</button>
             <button class="nav-btn" onclick="showPage('elgamal')">ElGamal</button>
             <button class="nav-btn" onclick="showPage('diffie')">Diffie-Hellman</button>
@@ -342,7 +389,7 @@
             </div>
 
             <!-- Encryption Section -->
-            <div class="rsa-section">
+            <div class="section">
                 <h3>🔒 Encryption</h3>
                 
                 <div class="toggle-container">
@@ -393,7 +440,7 @@
             </div>
 
             <!-- Decryption Section -->
-            <div class="rsa-section">
+            <div class="section">
                 <h3>🔓 Decryption</h3>
 
                 <div class="input-group">
@@ -413,6 +460,160 @@
                 <div class="loading" id="rsa-decrypt-loading">Decrypting...</div>
 
                 <div class="output" id="rsa-decrypt-output">Enter encrypted data and private key to start decryption...</div>
+            </div>
+        </div>
+
+        <!-- ECDH Page -->
+        <div id="ecdh" class="algorithm-page">
+            <h2>Elliptic Curve Diffie-Hellman (ECDH)</h2>
+            <div class="description">
+                <p><strong>ECDH</strong> is a key agreement protocol that allows two parties to establish a shared secret over an insecure channel using elliptic curve cryptography. This uses your custom C implementation with full parameter control.</p>
+            </div>
+
+            <!-- Key Generation Section -->
+            <div class="section">
+                <h3>🔑 Key Generation</h3>
+                
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ecdh-use-default-curve" checked onchange="toggleECDHCurveMode()">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="ecdh-use-default-curve">Use default curve parameters</label>
+                </div>
+
+                <div id="ecdh-default-curve" class="curve-params">
+                    <h4>Default Curve: y² = x³ + 5x + 87 (mod 524287)</h4>
+                    <p>Generator point: (3, 47926)</p>
+                </div>
+
+                <div id="ecdh-custom-curve" class="curve-params hidden">
+                    <h4>Custom Curve Parameters</h4>
+                    <div class="three-column">
+                        <div class="input-group">
+                            <label>Curve parameter 'a':</label>
+                            <input type="number" id="ecdh-curve-a" placeholder="5" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label>Curve parameter 'b':</label>
+                            <input type="number" id="ecdh-curve-b" placeholder="87" value="87">
+                        </div>
+                        <div class="input-group">
+                            <label>Prime modulus 'm':</label>
+                            <input type="number" id="ecdh-curve-m" placeholder="524287" value="524287">
+                        </div>
+                    </div>
+                    <div class="two-column">
+                        <div class="input-group">
+                            <label>Generator X (hex):</label>
+                            <input type="text" id="ecdh-generator-x" placeholder="3" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>Generator Y (hex):</label>
+                            <input type="text" id="ecdh-generator-y" placeholder="47926" value="47926">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ecdh-use-random-keys" checked onchange="toggleECDHKeyMode()">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="ecdh-use-random-keys">Generate random private keys</label>
+                </div>
+
+                <div id="ecdh-custom-keys" class="hidden">
+                    <div class="two-column">
+                        <div class="input-group">
+                            <label>Alice's Private Key (hex):</label>
+                            <input type="text" id="ecdh-alice-private-custom" placeholder="Enter hex private key">
+                        </div>
+                        <div class="input-group">
+                            <label>Bob's Private Key (hex):</label>
+                            <input type="text" id="ecdh-bob-private-custom" placeholder="Enter hex private key">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="generateECDHKeys()">Generate ECDH Keys</button>
+                </div>
+                <div class="loading" id="ecdh-generate-loading">Generating keys...</div>
+
+                <div class="two-column">
+                    <div class="party-section">
+                        <h4>👩 Alice's Keys</h4>
+                        <div class="input-group">
+                            <label>Private Key:</label>
+                            <input type="text" id="ecdh-alice-private" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>Public Key X:</label>
+                            <input type="text" id="ecdh-alice-public-x" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>Public Key Y:</label>
+                            <input type="text" id="ecdh-alice-public-y" readonly>
+                        </div>
+                    </div>
+
+                    <div class="party-section">
+                        <h4>👨 Bob's Keys</h4>
+                        <div class="input-group">
+                            <label>Private Key:</label>
+                            <input type="text" id="ecdh-bob-private" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>Public Key X:</label>
+                            <input type="text" id="ecdh-bob-public-x" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>Public Key Y:</label>
+                            <input type="text" id="ecdh-bob-public-y" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output" id="ecdh-generate-output">Click "Generate ECDH Keys" to start...</div>
+            </div>
+
+            <!-- Key Exchange Section -->
+            <div class="section">
+                <h3>🔄 Key Exchange</h3>
+
+                <div class="button-group">
+                    <button class="btn btn-warning" onclick="performECDHExchange()">Perform Key Exchange</button>
+                    <button class="btn" onclick="computeCustomSharedSecret()">Compute Custom Shared Secret</button>
+                </div>
+                <div class="loading" id="ecdh-exchange-loading">Performing key exchange...</div>
+
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ecdh-show-custom-compute" onchange="toggleCustomCompute()">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="ecdh-show-custom-compute">Show custom shared secret computation</label>
+                </div>
+
+                <div id="ecdh-custom-compute" class="hidden">
+                    <div class="input-group">
+                        <label>Your Private Key (hex):</label>
+                        <input type="text" id="ecdh-your-private" placeholder="Enter your private key in hex">
+                    </div>
+                    <div class="two-column">
+                        <div class="input-group">
+                            <label>Other Party's Public Key X (hex):</label>
+                            <input type="text" id="ecdh-other-public-x" placeholder="Enter public key X">
+                        </div>
+                        <div class="input-group">
+                            <label>Other Party's Public Key Y (hex):</label>
+                            <input type="text" id="ecdh-other-public-y" placeholder="Enter public key Y">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output" id="ecdh-exchange-output">Generate keys first, then perform key exchange...</div>
             </div>
         </div>
 
@@ -513,7 +714,7 @@
         <div id="diffie" class="algorithm-page">
             <h2>Diffie-Hellman Key Exchange</h2>
             <div class="description">
-                <p><strong>Diffie-Hellman</strong> key exchange protocol implemented in C. Demonstrates secure key agreement between two parties.</p>
+                <p><strong>Diffie-Hellman</strong> key exchange protocol implemented in C. Demonstrates secure key agreement between two parties using discrete logarithms.</p>
             </div>
 
             <div class="button-group">
@@ -553,6 +754,7 @@
     <script>
         const API_BASE = 'http://localhost:3000/api';
         let serverOnline = false;
+        let ecdhData = null; // Store ECDH data globally
 
         // Check server status
         async function checkServer() {
@@ -581,7 +783,7 @@
             event.target.classList.add('active');
         }
 
-        // Toggle encrypt key mode
+        // Toggle functions
         function toggleEncryptKeyMode() {
             const useRandom = document.getElementById('encrypt-use-random-keys').checked;
             const randomSection = document.getElementById('encrypt-random-section');
@@ -593,6 +795,42 @@
             } else {
                 randomSection.classList.add('hidden');
                 manualSection.classList.remove('hidden');
+            }
+        }
+
+        function toggleECDHCurveMode() {
+            const useDefault = document.getElementById('ecdh-use-default-curve').checked;
+            const defaultSection = document.getElementById('ecdh-default-curve');
+            const customSection = document.getElementById('ecdh-custom-curve');
+            
+            if (useDefault) {
+                defaultSection.classList.remove('hidden');
+                customSection.classList.add('hidden');
+            } else {
+                defaultSection.classList.add('hidden');
+                customSection.classList.remove('hidden');
+            }
+        }
+
+        function toggleECDHKeyMode() {
+            const useRandom = document.getElementById('ecdh-use-random-keys').checked;
+            const customSection = document.getElementById('ecdh-custom-keys');
+            
+            if (useRandom) {
+                customSection.classList.add('hidden');
+            } else {
+                customSection.classList.remove('hidden');
+            }
+        }
+
+        function toggleCustomCompute() {
+            const showCustom = document.getElementById('ecdh-show-custom-compute').checked;
+            const customSection = document.getElementById('ecdh-custom-compute');
+            
+            if (showCustom) {
+                customSection.classList.remove('hidden');
+            } else {
+                customSection.classList.add('hidden');
             }
         }
 
@@ -659,131 +897,297 @@
             }
         }
 
-        // Generate RSA keys
+        // RSA Functions
         async function generateKeys(algorithm) {
-        if (algorithm === 'rsa') {
-        toggleLoading('rsa-loading', true);
-        
-        const result = await apiCall('/rsa/generate');
-        
-        toggleLoading('rsa-loading', false);
-        
-        if (result.error) {
-            document.getElementById('rsa-encrypt-output').textContent = `Error: ${result.error}`;
-            document.getElementById('rsa-encrypt-output').className = 'output error';
-            return;
+            if (algorithm === 'rsa') {
+                toggleLoading('rsa-loading', true);
+                
+                const result = await apiCall('/rsa/generate');
+                
+                toggleLoading('rsa-loading', false);
+                
+                if (result.error) {
+                    document.getElementById('rsa-encrypt-output').textContent = `Error: ${result.error}`;
+                    document.getElementById('rsa-encrypt-output').className = 'output error';
+                    return;
+                }
+
+                document.getElementById('rsa-public-key-generated').value = result.publicKey;
+                document.getElementById('rsa-private-key-generated').value = result.privateKey;
+                document.getElementById('rsa-encrypt-output').textContent = 'RSA keys generated successfully!';
+                document.getElementById('rsa-encrypt-output').className = 'output success';
+            }
         }
 
-        document.getElementById('rsa-public-key-generated').value = result.publicKey;
-        document.getElementById('rsa-private-key-generated').value = result.privateKey;
-        document.getElementById('rsa-encrypt-output').textContent = 'RSA keys generated successfully!';
-        document.getElementById('rsa-encrypt-output').className = 'output success';
-        }
-        }
-
-        // RSA Encryption
         async function encryptRSA() {
-        const message = document.getElementById('rsa-message-encrypt').value;
-        if (!message.trim()) {
-        document.getElementById('rsa-encrypt-output').textContent = 'Please enter a message to encrypt';
-        document.getElementById('rsa-encrypt-output').className = 'output error';
-        return;
+            const message = document.getElementById('rsa-message-encrypt').value;
+            if (!message.trim()) {
+                document.getElementById('rsa-encrypt-output').textContent = 'Please enter a message to encrypt';
+                document.getElementById('rsa-encrypt-output').className = 'output error';
+                return;
+            }
+
+            const useRandom = document.getElementById('encrypt-use-random-keys').checked;
+            let publicKey;
+            
+            if (useRandom) {
+                publicKey = document.getElementById('rsa-public-key-generated').value;
+            } else {
+                publicKey = document.getElementById('rsa-public-key-manual').value;
+            }
+
+            if (!publicKey.trim()) {
+                document.getElementById('rsa-encrypt-output').textContent = 'Please generate keys or enter a public key';
+                document.getElementById('rsa-encrypt-output').className = 'output error';
+                return;
+            }
+
+            toggleLoading('rsa-encrypt-loading', true);
+
+            const result = await apiCall('/rsa/encrypt', { message, publicKey });
+            
+            toggleLoading('rsa-encrypt-loading', false);
+
+            if (result.error) {
+                document.getElementById('rsa-encrypt-output').textContent = `Encryption Error: ${result.error}`;
+                document.getElementById('rsa-encrypt-output').className = 'output error';
+            } else {
+                let outputText = `Encryption Successful!\n\n`;
+                outputText += `Original Text: ${result.originalText}\n`;
+                outputText += `Original Number: ${result.originalNumber}\n`;
+                outputText += `Encrypted (hex): ${result.encrypted}\n\n`;
+                outputText += `Copy this encrypted value for decryption: ${result.encrypted}`;
+                
+                document.getElementById('rsa-encrypt-output').textContent = outputText;
+                document.getElementById('rsa-encrypt-output').className = 'output success';
+                
+                document.getElementById('rsa-encrypted-input').value = result.encrypted;
+            }
         }
 
-        const useRandom = document.getElementById('encrypt-use-random-keys').checked;
-        let publicKey;
-        
-        if (useRandom) {
-            publicKey = document.getElementById('rsa-public-key-generated').value;
-        } else {
-            publicKey = document.getElementById('rsa-public-key-manual').value;
-        }
-
-        if (!publicKey.trim()) {
-            document.getElementById('rsa-encrypt-output').textContent = 'Please generate keys or enter a public key';
-            document.getElementById('rsa-encrypt-output').className = 'output error';
-            return;
-        }
-
-    toggleLoading('rsa-encrypt-loading', true);
-
-        const result = await apiCall('/rsa/encrypt', { message, publicKey });
-        
-        toggleLoading('rsa-encrypt-loading', false);
-
-        if (result.error) {
-            document.getElementById('rsa-encrypt-output').textContent = `Encryption Error: ${result.error}`;
-            document.getElementById('rsa-encrypt-output').className = 'output error';
-        } else {
-        // Handle the response from your C program
-        let outputText = `Encryption Successful!\n\n`;
-        outputText += `Original Text: ${result.originalText}\n`;
-        outputText += `Original Number: ${result.originalNumber}\n`;
-        outputText += `Encrypted (hex): ${result.encrypted}\n\n`;
-        outputText += `Copy this encrypted value for decryption: ${result.encrypted}`;
-        
-        document.getElementById('rsa-encrypt-output').textContent = outputText;
-        document.getElementById('rsa-encrypt-output').className = 'output success';
-        
-        // Optionally auto-copy the encrypted value to the decrypt section
-        document.getElementById('rsa-encrypted-input').value = result.encrypted;
-        }
-        }
-
-
-        // RSA Decryption
         async function decryptRSA() {
-        const privateKey = document.getElementById('rsa-private-key-decrypt').value;
-        const encryptedData = document.getElementById('rsa-encrypted-input').value;
-        
-        if (!privateKey.trim()) {
-            document.getElementById('rsa-decrypt-output').textContent = 'Please enter a private key';
-            document.getElementById('rsa-decrypt-output').className = 'output error';
-            return;
-        }
-        
-        if (!encryptedData.trim()) {
-            document.getElementById('rsa-decrypt-output').textContent = 'Please enter encrypted data to decrypt';
-            document.getElementById('rsa-decrypt-output').className = 'output error';
-            return;
-        }
-
-        toggleLoading('rsa-decrypt-loading', true);
-
-        const result = await apiCall('/rsa/decrypt', { privateKey, encryptedData });
-        
-        toggleLoading('rsa-decrypt-loading', false);
-
-        if (result.error) {
-            document.getElementById('rsa-decrypt-output').textContent = `Decryption Error: ${result.error}`;
-            document.getElementById('rsa-decrypt-output').className = 'output error';
-        } else {
-            // Handle the response from your C program
-            let outputText = `Decryption Successful!\n\n`;
-            outputText += `Decrypted Number: ${result.decryptedNumber}\n`;
+            const privateKey = document.getElementById('rsa-private-key-decrypt').value;
+            const encryptedData = document.getElementById('rsa-encrypted-input').value;
             
-        if (result.decryptedText) {
-            outputText += `Decrypted Text: "${result.decryptedText}"\n`;
-        } else {
-            outputText += `Decrypted Text: (Non-printable or binary data)\n`;
-        }
+            if (!privateKey.trim()) {
+                document.getElementById('rsa-decrypt-output').textContent = 'Please enter a private key';
+                document.getElementById('rsa-decrypt-output').className = 'output error';
+                return;
+            }
             
-        document.getElementById('rsa-decrypt-output').textContent = outputText;
-        document.getElementById('rsa-decrypt-output').className = 'output success';
-        }
-    }
+            if (!encryptedData.trim()) {
+                document.getElementById('rsa-decrypt-output').textContent = 'Please enter encrypted data to decrypt';
+                document.getElementById('rsa-decrypt-output').className = 'output error';
+                return;
+            }
 
-        // Placeholder functions for other algorithms (keep your existing implementations)
+            toggleLoading('rsa-decrypt-loading', true);
+
+            const result = await apiCall('/rsa/decrypt', { privateKey, encryptedData });
+            
+            toggleLoading('rsa-decrypt-loading', false);
+
+            if (result.error) {
+                document.getElementById('rsa-decrypt-output').textContent = `Decryption Error: ${result.error}`;
+                document.getElementById('rsa-decrypt-output').className = 'output error';
+            } else {
+                let outputText = `Decryption Successful!\n\n`;
+                outputText += `Decrypted Number: ${result.decryptedNumber}\n`;
+                
+                if (result.decryptedText) {
+                    outputText += `Decrypted Text: "${result.decryptedText}"\n`;
+                } else {
+                    outputText += `Decrypted Text: (Non-printable or binary data)\n`;
+                }
+                
+                document.getElementById('rsa-decrypt-output').textContent = outputText;
+                document.getElementById('rsa-decrypt-output').className = 'output success';
+            }
+        }
+
+        // ECDH Functions
+        async function generateECDHKeys() {
+            toggleLoading('ecdh-generate-loading', true);
+            
+            const useDefaultCurve = document.getElementById('ecdh-use-default-curve').checked;
+            const useRandomKeys = document.getElementById('ecdh-use-random-keys').checked;
+            
+            let requestData = {
+                useCustom: !useDefaultCurve
+            };
+            
+            if (!useDefaultCurve) {
+                requestData.curveParams = {
+                    a: document.getElementById('ecdh-curve-a').value || '5',
+                    b: document.getElementById('ecdh-curve-b').value || '87',
+                    m: document.getElementById('ecdh-curve-m').value || '524287',
+                    gx: document.getElementById('ecdh-generator-x').value || '3',
+                    gy: document.getElementById('ecdh-generator-y').value || '47926'
+                };
+            }
+            
+            if (!useRandomKeys) {
+                const alicePrivate = document.getElementById('ecdh-alice-private-custom').value;
+                const bobPrivate = document.getElementById('ecdh-bob-private-custom').value;
+                
+                if (alicePrivate && bobPrivate) {
+                    requestData.privateKeys = {
+                        alice: alicePrivate,
+                        bob: bobPrivate
+                    };
+                }
+            }
+            
+            const result = await apiCall('/ecdh/generate', requestData);
+            
+            toggleLoading('ecdh-generate-loading', false);
+            
+            if (result.error) {
+                document.getElementById('ecdh-generate-output').textContent = `Error: ${result.error}`;
+                document.getElementById('ecdh-generate-output').className = 'output error';
+                return;
+            }
+            
+            // Store the data globally
+            ecdhData = result;
+            
+            // Update UI with generated keys
+            document.getElementById('ecdh-alice-private').value = result.alice.privateKey;
+            document.getElementById('ecdh-alice-public-x').value = result.alice.publicKey.x;
+            document.getElementById('ecdh-alice-public-y').value = result.alice.publicKey.y;
+            
+            document.getElementById('ecdh-bob-private').value = result.bob.privateKey;
+            document.getElementById('ecdh-bob-public-x').value = result.bob.publicKey.x;
+            document.getElementById('ecdh-bob-public-y').value = result.bob.publicKey.y;
+            
+            let outputText = `ECDH Keys Generated Successfully!\n\n`;
+            outputText += `Curve: y² = x³ + ${result.curve.a}x + ${result.curve.b} (mod ${result.curve.m})\n`;
+            outputText += `Generator: (${result.curve.generator.x}, ${result.curve.generator.y})\n\n`;
+            outputText += `Alice's Private Key: ${result.alice.privateKey}\n`;
+            outputText += `Alice's Public Key: (${result.alice.publicKey.x}, ${result.alice.publicKey.y})\n\n`;
+            outputText += `Bob's Private Key: ${result.bob.privateKey}\n`;
+            outputText += `Bob's Public Key: (${result.bob.publicKey.x}, ${result.bob.publicKey.y})\n\n`;
+            outputText += `Ready for key exchange!`;
+            
+            document.getElementById('ecdh-generate-output').textContent = outputText;
+            document.getElementById('ecdh-generate-output').className = 'output success';
+        }
+
+        async function performECDHExchange() {
+            if (!ecdhData) {
+                document.getElementById('ecdh-exchange-output').textContent = 'Please generate keys first!';
+                document.getElementById('ecdh-exchange-output').className = 'output error';
+                return;
+            }
+            
+            toggleLoading('ecdh-exchange-loading', true);
+            
+            const requestData = {
+                curveParams: {
+                    a: ecdhData.curve.a,
+                    b: ecdhData.curve.b,
+                    m: ecdhData.curve.m,
+                    gx: ecdhData.curve.generator.x,
+                    gy: ecdhData.curve.generator.y
+                },
+                privateKeys: {
+                    alice: ecdhData.alice.privateKey,
+                    bob: ecdhData.bob.privateKey
+                },
+                publicKeys: {
+                    alice: ecdhData.alice.publicKey,
+                    bob: ecdhData.bob.publicKey
+                }
+            };
+            
+            const result = await apiCall('/ecdh/exchange', requestData);
+            
+            toggleLoading('ecdh-exchange-loading', false);
+            
+            if (result.error) {
+                document.getElementById('ecdh-exchange-output').textContent = `Error: ${result.error}`;
+                document.getElementById('ecdh-exchange-output').className = 'output error';
+                return;
+            }
+            
+            let outputText = `Key Exchange Successful! ✅\n\n`;
+            outputText += `Shared Secret: (${result.sharedSecret.x}, ${result.sharedSecret.y})\n\n`;
+            outputText += `Process:\n`;
+            outputText += `1. Alice computes: ${ecdhData.alice.privateKey} * Bob's_Public_Key\n`;
+            outputText += `2. Bob computes: ${ecdhData.bob.privateKey} * Alice's_Public_Key\n`;
+            outputText += `3. Both get the same result: (${result.sharedSecret.x}, ${result.sharedSecret.y})\n\n`;
+            outputText += `This shared secret can now be used to derive symmetric encryption keys!`;
+            
+            document.getElementById('ecdh-exchange-output').textContent = outputText;
+            document.getElementById('ecdh-exchange-output').className = 'output success';
+        }
+
+        async function computeCustomSharedSecret() {
+            const privateKey = document.getElementById('ecdh-your-private').value;
+            const publicKeyX = document.getElementById('ecdh-other-public-x').value;
+            const publicKeyY = document.getElementById('ecdh-other-public-y').value;
+            
+            if (!privateKey || !publicKeyX || !publicKeyY) {
+                document.getElementById('ecdh-exchange-output').textContent = 'Please enter all required keys for custom computation';
+                document.getElementById('ecdh-exchange-output').className = 'output error';
+                return;
+            }
+            
+            if (!ecdhData) {
+                document.getElementById('ecdh-exchange-output').textContent = 'Please generate keys first to get curve parameters';
+                document.getElementById('ecdh-exchange-output').className = 'output error';
+                return;
+            }
+            
+            toggleLoading('ecdh-exchange-loading', true);
+            
+            const requestData = {
+                curveParams: {
+                    a: ecdhData.curve.a,
+                    b: ecdhData.curve.b,
+                    m: ecdhData.curve.m
+                },
+                privateKey: privateKey,
+                publicKey: {
+                    x: publicKeyX,
+                    y: publicKeyY
+                }
+            };
+            
+            const result = await apiCall('/ecdh/compute-shared', requestData);
+            
+            toggleLoading('ecdh-exchange-loading', false);
+            
+            if (result.error) {
+                document.getElementById('ecdh-exchange-output').textContent = `Error: ${result.error}`;
+                document.getElementById('ecdh-exchange-output').className = 'output error';
+                return;
+            }
+            
+            let outputText = `Custom Shared Secret Computed! ✅\n\n`;
+            outputText += `Your Private Key: ${privateKey}\n`;
+            outputText += `Other Party's Public Key: (${publicKeyX}, ${publicKeyY})\n`;
+            outputText += `Computed Shared Secret: (${result.sharedSecret.x}, ${result.sharedSecret.y})\n\n`;
+            outputText += `This is the result of multiplying the other party's public key by your private key.`;
+            
+            document.getElementById('ecdh-exchange-output').textContent = outputText;
+            document.getElementById('ecdh-exchange-output').className = 'output success';
+        }
+
+        // Placeholder functions for other algorithms
         async function encrypt(algorithm) {
-            // Your existing encrypt function for AES, ElGamal, etc.
+            document.getElementById(algorithm + '-output').textContent = `${algorithm.toUpperCase()} encryption not implemented yet in this demo`;
+            document.getElementById(algorithm + '-output').className = 'output error';
         }
 
         async function decrypt(algorithm) {
-            // Your existing decrypt function for AES, ElGamal, etc.
+            document.getElementById(algorithm + '-output').textContent = `${algorithm.toUpperCase()} decryption not implemented yet in this demo`;
+            document.getElementById(algorithm + '-output').className = 'output error';
         }
 
         async function performKeyExchange() {
-            // Your existing Diffie-Hellman function
+            document.getElementById('diffie-output').textContent = 'Classic Diffie-Hellman not implemented yet in this demo';
+            document.getElementById('diffie-output').className = 'output error';
         }
 
         // Initialize

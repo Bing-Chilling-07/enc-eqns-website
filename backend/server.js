@@ -63,7 +63,7 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// RSA Endpoints
+// RSA Endpoints (keep your existing RSA code)
 app.post('/api/rsa/generate', async (req, res) => {
     try {
         const result = await executeC('rsa_keygen', []);
@@ -86,7 +86,6 @@ app.post('/api/rsa/encrypt', async (req, res) => {
             return res.status(400).json({ error: 'Message and public key are required' });
         }
 
-        // Parse public key (expecting format "n: ...\ne: ...")
         const lines = publicKey.split('\n');
         const n = lines[0].replace('n: ', '').trim();
         const e = lines[1].replace('e: ', '').trim();
@@ -106,12 +105,93 @@ app.post('/api/rsa/decrypt', async (req, res) => {
             return res.status(400).json({ error: 'Private key and encrypted data are required' });
         }
 
-        // Parse private key
         const lines = privateKey.split('\n');
         const n = lines[0].replace('n: ', '').trim();
         const d = lines[1].replace('d: ', '').trim();
 
         const result = await executeC('rsa_decrypt', [encryptedData, n, d]);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+// ECDH Endpoints
+app.post('/api/ecdh/generate', async (req, res) => {
+    try {
+        const { useCustom, curveParams, privateKeys } = req.body;
+        
+        let args = ['generate'];
+        
+        if (useCustom && curveParams) {
+            // Add curve parameters: a, b, m, gx, gy
+            args.push(
+                curveParams.a || '5',
+                curveParams.b || '87', 
+                curveParams.m || '524287',
+                curveParams.gx || '3',
+                curveParams.gy || '47926'
+            );
+            
+            // Add private keys if provided
+            if (privateKeys && privateKeys.alice && privateKeys.bob) {
+                args.push(privateKeys.alice, privateKeys.bob);
+            }
+        }
+        
+        const result = await executeC('ecdh', args);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+app.post('/api/ecdh/exchange', async (req, res) => {
+    try {
+        const { curveParams, privateKeys, publicKeys } = req.body;
+        
+        if (!curveParams || !privateKeys) {
+            return res.status(400).json({ error: 'Curve parameters and private keys are required' });
+        }
+        
+        let args = [
+            'exchange',
+            curveParams.a, curveParams.b, curveParams.m,
+            curveParams.gx, curveParams.gy,
+            privateKeys.alice, privateKeys.bob
+        ];
+        
+        // Add public keys if provided
+        if (publicKeys && publicKeys.alice && publicKeys.bob) {
+            args.push(
+                publicKeys.alice.x, publicKeys.alice.y,
+                publicKeys.bob.x, publicKeys.bob.y
+            );
+        }
+        
+        const result = await executeC('ecdh', args);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+app.post('/api/ecdh/compute-shared', async (req, res) => {
+    try {
+        const { curveParams, privateKey, publicKey } = req.body;
+        
+        if (!curveParams || !privateKey || !publicKey) {
+            return res.status(400).json({ error: 'Curve parameters, private key, and public key are required' });
+        }
+        
+        const args = [
+            'compute_shared',
+            curveParams.a, curveParams.b, curveParams.m,
+            privateKey,
+            publicKey.x, publicKey.y
+        ];
+        
+        const result = await executeC('ecdh', args);
         res.json(result);
     } catch (error) {
         res.status(500).json(error);
@@ -189,7 +269,7 @@ app.post('/api/elgamal/decrypt', async (req, res) => {
     }
 });
 
-// Diffie-Hellman Endpoints (placeholder)
+// Diffie-Hellman Classic Endpoints (placeholder)
 app.post('/api/diffie-hellman/exchange', async (req, res) => {
     try {
         const result = await executeC('diffie_hellman', ['exchange']);
@@ -211,7 +291,8 @@ app.listen(PORT, () => {
     console.log('  gcc -o c_programs/rsa_keygen rsa_keygen.c -lgmp');
     console.log('  gcc -o c_programs/rsa_encrypt rsa_encrypt.c -lgmp');
     console.log('  gcc -o c_programs/rsa_decrypt rsa_decrypt.c -lgmp');
-    console.log('  chmod +x c_programs/rsa_*');
+    console.log('  gcc -o c_programs/ecdh ecdh.c -lgmp -lssl -lcrypto');
+    console.log('  chmod +x c_programs/*');
 });
 
 module.exports = app;
